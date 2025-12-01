@@ -101,10 +101,48 @@
             padding: 4px 8px;
             border-radius: 4px;
         }
+        
+        .fps-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .fps-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+        
+        .fps-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        
+        .fps-good { color: #00ff88; }
+        .fps-warn { color: #ffaa00; }
+        .fps-bad { color: #ff4444; }
     </style>
 </head>
 <body>
     <div id="canvas-container"></div>
+    
+    <div class="fps-counter">
+        <div class="fps-value" id="fps-value">60</div>
+        <div class="fps-label">FPS</div>
+    </div>
     
     <div class="overlay">
         <h1>🎮 Orbrya Demo</h1>
@@ -142,20 +180,40 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <script>
+        let lastTime = performance.now();
+        let frames = 0;
+        let fps = 60;
+        const fpsElement = document.getElementById('fps-value');
+        
+        function updateFPS() {
+            frames++;
+            const currentTime = performance.now();
+            const delta = currentTime - lastTime;
+            
+            if (delta >= 1000) {
+                fps = Math.round((frames * 1000) / delta);
+                fpsElement.textContent = fps;
+                
+                fpsElement.className = 'fps-value';
+                if (fps >= 55) {
+                    fpsElement.classList.add('fps-good');
+                } else if (fps >= 30) {
+                    fpsElement.classList.add('fps-warn');
+                } else {
+                    fpsElement.classList.add('fps-bad');
+                }
+                
+                frames = 0;
+                lastTime = currentTime;
+            }
+        }
+        
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x0a0e27);
         
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight, 
-            0.1, 
-            1000
-        );
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         
-        const renderer = new THREE.WebGLRenderer({ 
-            antialias: true,
-            alpha: true 
-        });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
@@ -212,6 +270,8 @@
         
         function animate() {
             requestAnimationFrame(animate);
+            
+            updateFPS();
             
             cube.rotation.x += rotationSpeed.x;
             cube.rotation.y += rotationSpeed.y;
