@@ -24,7 +24,7 @@ jobs:
         dotnet-version: '8.0.x'
     
     - name: 🔨 Install WASM Workload
-      run: dotnet workload install wasm-tools
+      run: dotnet workload restore WasmApp/WasmApp.csproj
     
     - name: 📦 Restore dependencies
       run: dotnet restore WasmApp/WasmApp.csproj
