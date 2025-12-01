@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orbrya Cube Demo - C# + Three.js</title>
+    <title>Orbrya Forest Demo - C# + Three.js</title>
     <style>
         * {
             margin: 0;
@@ -134,6 +134,20 @@
         .fps-good { color: #00ff88; }
         .fps-warn { color: #ffaa00; }
         .fps-bad { color: #ff4444; }
+        
+        .object-count {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 10px 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            font-size: 12px;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
     </style>
 </head>
 <body>
@@ -144,25 +158,27 @@
         <div class="fps-label">FPS</div>
     </div>
     
+    <div class="object-count" id="object-count">Trees: 0</div>
+    
     <div class="overlay">
-        <h1>🎮 Orbrya Demo</h1>
-        <p class="subtitle">C# WebAssembly controlling Three.js</p>
+        <h1>🌲 Orbrya Forest Demo</h1>
+        <p class="subtitle">C# WebAssembly + Three.js on Chromebook</p>
         
         <div class="controls">
-            <button class="control-btn" onclick="CSharpController.increaseSpeed()" disabled>
-                ⚡ Faster
+            <button class="control-btn" onclick="CSharpController.addTrees()" disabled>
+                ➕ Add Trees
             </button>
-            <button class="control-btn" onclick="CSharpController.decreaseSpeed()" disabled>
-                🐌 Slower
+            <button class="control-btn" onclick="CSharpController.removeTrees()" disabled>
+                ➖ Remove Trees
+            </button>
+            <button class="control-btn" onclick="CSharpController.startRotation()" disabled>
+                🔄 Rotate
             </button>
             <button class="control-btn" onclick="CSharpController.stopRotation()" disabled>
                 ⏸️ Stop
             </button>
-            <button class="control-btn" onclick="CSharpController.setSpeed(1)" disabled>
-                🔄 Reset
-            </button>
-            <button class="control-btn wide" onclick="CSharpController.setCustomSpeed(0.03, -0.02)" disabled>
-                🎲 Random Pattern
+            <button class="control-btn wide" onclick="CSharpController.resetCamera()" disabled>
+                📷 Reset View
             </button>
         </div>
         
@@ -209,63 +225,113 @@
         }
         
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0e27);
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
         
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 3, 8);
+        camera.lookAt(0, 0, 0);
         
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.getElementById('canvas-container').appendChild(renderer.domElement);
         
-        const geometry = new THREE.BoxGeometry(2, 2, 2);
-        const material = new THREE.MeshPhongMaterial({ 
-            color: 0x00ff88,
-            emissive: 0x00ff88,
-            emissiveIntensity: 0.2,
-            shininess: 100
-        });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-        
-        const edges = new THREE.EdgesGeometry(geometry);
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
-        const wireframe = new THREE.LineSegments(edges, lineMaterial);
-        cube.add(wireframe);
-        
-        const light1 = new THREE.DirectionalLight(0xffffff, 1);
-        light1.position.set(5, 5, 5);
-        scene.add(light1);
-        
-        const light2 = new THREE.DirectionalLight(0x667eea, 0.5);
-        light2.position.set(-5, -5, -5);
-        scene.add(light2);
-        
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
         
-        const starGeometry = new THREE.BufferGeometry();
-        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
-        const starVertices = [];
-        for (let i = 0; i < 200; i++) {
-            const x = (Math.random() - 0.5) * 100;
-            const y = (Math.random() - 0.5) * 100;
-            const z = (Math.random() - 0.5) * 100;
-            starVertices.push(x, y, z);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 7);
+        dirLight.castShadow = true;
+        dirLight.shadow.camera.top = 20;
+        dirLight.shadow.camera.bottom = -20;
+        dirLight.shadow.camera.left = -20;
+        dirLight.shadow.camera.right = 20;
+        scene.add(dirLight);
+        
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x2d5016 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        
+        const trees = [];
+        let rotationSpeed = 0;
+        
+        function createTree(x, z) {
+            const treeGroup = new THREE.Group();
+            
+            const trunkHeight = 1.5 + Math.random() * 1;
+            const trunkGeometry = new THREE.CylinderGeometry(0.15, 0.2, trunkHeight, 8);
+            const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.y = trunkHeight / 2;
+            trunk.castShadow = true;
+            treeGroup.add(trunk);
+            
+            const foliageGeometry = new THREE.ConeGeometry(0.8, 2, 8);
+            const foliageMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+            
+            for (let i = 0; i < 3; i++) {
+                const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+                foliage.position.y = trunkHeight + 0.3 + (i * 0.5);
+                foliage.castShadow = true;
+                treeGroup.add(foliage);
+            }
+            
+            treeGroup.position.set(x, 0, z);
+            scene.add(treeGroup);
+            trees.push(treeGroup);
+            
+            return treeGroup;
         }
-        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-        const stars = new THREE.Points(starGeometry, starMaterial);
-        scene.add(stars);
         
-        camera.position.z = 5;
+        for (let i = 0; i < 25; i++) {
+            const x = (Math.random() - 0.5) * 20;
+            const z = (Math.random() - 0.5) * 20;
+            createTree(x, z);
+        }
         
-        let rotationSpeed = { x: 0.01, y: 0.01 };
+        document.getElementById('object-count').textContent = `Trees: ${trees.length}`;
         
-        window.setRotationSpeed = function(x, y) {
-            rotationSpeed.x = x;
-            rotationSpeed.y = y;
-            document.getElementById('status').textContent = 
-                `Rotating at X:${x.toFixed(3)}, Y:${y.toFixed(3)}`;
+        window.addTrees = function() {
+            for (let i = 0; i < 10; i++) {
+                const x = (Math.random() - 0.5) * 25;
+                const z = (Math.random() - 0.5) * 25;
+                createTree(x, z);
+            }
+            document.getElementById('object-count').textContent = `Trees: ${trees.length}`;
+            document.getElementById('status').textContent = `Added 10 trees. Total: ${trees.length}`;
+        };
+        
+        window.removeTrees = function() {
+            const toRemove = Math.min(10, trees.length);
+            for (let i = 0; i < toRemove; i++) {
+                const tree = trees.pop();
+                scene.remove(tree);
+            }
+            document.getElementById('object-count').textContent = `Trees: ${trees.length}`;
+            document.getElementById('status').textContent = `Removed ${toRemove} trees. Total: ${trees.length}`;
+        };
+        
+        window.startRotation = function() {
+            rotationSpeed = 0.003;
+            document.getElementById('status').textContent = 'Camera rotating...';
+        };
+        
+        window.stopRotation = function() {
+            rotationSpeed = 0;
+            document.getElementById('status').textContent = 'Camera stopped';
+        };
+        
+        window.resetCamera = function() {
+            camera.position.set(0, 3, 8);
+            camera.lookAt(0, 0, 0);
+            rotationSpeed = 0;
+            document.getElementById('status').textContent = 'Camera reset';
         };
         
         function animate() {
@@ -273,10 +339,12 @@
             
             updateFPS();
             
-            cube.rotation.x += rotationSpeed.x;
-            cube.rotation.y += rotationSpeed.y;
-            
-            stars.rotation.y += 0.0001;
+            if (rotationSpeed !== 0) {
+                const time = Date.now() * rotationSpeed;
+                camera.position.x = Math.sin(time) * 8;
+                camera.position.z = Math.cos(time) * 8;
+                camera.lookAt(0, 0, 0);
+            }
             
             renderer.render(scene, camera);
         }
@@ -288,7 +356,8 @@
         });
         
         animate();
-        console.log('✅ Three.js scene initialized');
+        console.log('✅ Three.js forest scene initialized');
+        console.log(`🌲 ${trees.length} trees rendered`);
     </script>
     
     <script type="module" src="./main.js"></script>

@@ -1,10 +1,32 @@
 import { dotnet } from './_framework/dotnet.js';
 
-export function setRotationSpeed(x, y) {
-    if (window.setRotationSpeed) {
-        window.setRotationSpeed(x, y);
-    } else {
-        console.warn('Three.js scene not ready yet');
+export function addTrees() {
+    if (window.addTrees) {
+        window.addTrees();
+    }
+}
+
+export function removeTrees() {
+    if (window.removeTrees) {
+        window.removeTrees();
+    }
+}
+
+export function startRotation() {
+    if (window.startRotation) {
+        window.startRotation();
+    }
+}
+
+export function stopRotation() {
+    if (window.stopRotation) {
+        window.stopRotation();
+    }
+}
+
+export function resetCamera() {
+    if (window.resetCamera) {
+        window.resetCamera();
     }
 }
 
@@ -17,7 +39,11 @@ async function initDotNet() {
         .create();
 
     setModuleImports('main.js', {
-        setRotationSpeed: setRotationSpeed
+        addTrees: addTrees,
+        removeTrees: removeTrees,
+        startRotation: startRotation,
+        stopRotation: stopRotation,
+        resetCamera: resetCamera
     });
 
     const config = getConfig();
@@ -26,15 +52,15 @@ async function initDotNet() {
     await exports.OrbryaCubeDemo.Program.Main();
 
     window.CSharpController = {
-        setSpeed: exports.OrbryaCubeDemo.CubeController.SetSpeed,
-        increaseSpeed: exports.OrbryaCubeDemo.CubeController.IncreaseSpeed,
-        decreaseSpeed: exports.OrbryaCubeDemo.CubeController.DecreaseSpeed,
+        addTrees: exports.OrbryaCubeDemo.CubeController.AddTrees,
+        removeTrees: exports.OrbryaCubeDemo.CubeController.RemoveTrees,
+        startRotation: exports.OrbryaCubeDemo.CubeController.StartRotation,
         stopRotation: exports.OrbryaCubeDemo.CubeController.StopRotation,
-        setCustomSpeed: exports.OrbryaCubeDemo.CubeController.SetCustomSpeed
+        resetCamera: exports.OrbryaCubeDemo.CubeController.ResetCamera
     };
 
     console.log('✅ C# WASM loaded successfully!');
-    console.log('💡 Try: CSharpController.increaseSpeed()');
+    console.log('💡 Try: CSharpController.addTrees()');
     
     document.querySelectorAll('.control-btn').forEach(btn => {
         btn.disabled = false;

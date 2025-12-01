@@ -5,43 +5,54 @@ namespace OrbryaCubeDemo;
 
 public partial class CubeController
 {
-    [JSImport("setRotationSpeed", "main.js")]
-    internal static partial void SetRotationSpeed(double x, double y);
+    [JSImport("addTrees", "main.js")]
+    internal static partial void AddTreesJS();
+    
+    [JSImport("removeTrees", "main.js")]
+    internal static partial void RemoveTreesJS();
+    
+    [JSImport("startRotation", "main.js")]
+    internal static partial void StartRotationJS();
+    
+    [JSImport("stopRotation", "main.js")]
+    internal static partial void StopRotationJS();
+    
+    [JSImport("resetCamera", "main.js")]
+    internal static partial void ResetCameraJS();
     
     [JSExport]
-    public static void SetSpeed(double speedMultiplier)
+    public static void AddTrees()
     {
-        double baseSpeed = 0.01;
-        SetRotationSpeed(baseSpeed * speedMultiplier, baseSpeed * speedMultiplier);
-        Console.WriteLine($"Speed set to: {speedMultiplier}x");
+        AddTreesJS();
+        Console.WriteLine("Added 10 trees to the forest");
     }
     
     [JSExport]
-    public static void IncreaseSpeed()
+    public static void RemoveTrees()
     {
-        SetRotationSpeed(0.02, 0.02);
-        Console.WriteLine("Speed increased to 2x");
+        RemoveTreesJS();
+        Console.WriteLine("Removed 10 trees from the forest");
     }
     
     [JSExport]
-    public static void DecreaseSpeed()
+    public static void StartRotation()
     {
-        SetRotationSpeed(0.005, 0.005);
-        Console.WriteLine("Speed decreased to 0.5x");
+        StartRotationJS();
+        Console.WriteLine("Started camera rotation");
     }
     
     [JSExport]
     public static void StopRotation()
     {
-        SetRotationSpeed(0, 0);
-        Console.WriteLine("Rotation stopped");
+        StopRotationJS();
+        Console.WriteLine("Stopped camera rotation");
     }
     
     [JSExport]
-    public static void SetCustomSpeed(double xSpeed, double ySpeed)
+    public static void ResetCamera()
     {
-        SetRotationSpeed(xSpeed, ySpeed);
-        Console.WriteLine($"Custom speed set - X: {xSpeed}, Y: {ySpeed}");
+        ResetCameraJS();
+        Console.WriteLine("Camera position reset");
     }
 }
 
@@ -50,7 +61,7 @@ public partial class Program
     [JSExport]
     public static void Main()
     {
-        Console.WriteLine("🎮 Orbrya Cube Demo - C# WASM Initialized!");
-        Console.WriteLine("✅ Backend ready to control frontend");
+        Console.WriteLine("🌲 Orbrya Forest Demo - C# WASM Initialized!");
+        Console.WriteLine("✅ Backend ready to control forest scene");
     }
 }
