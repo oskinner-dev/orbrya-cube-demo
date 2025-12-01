@@ -33,7 +33,13 @@ jobs:
       run: dotnet build WasmApp/WasmApp.csproj -c Release --no-restore
     
     - name: 📤 Publish
-      run: dotnet publish WasmApp/WasmApp.csproj -c Release -o ./publish
+      run: dotnet publish WasmApp/WasmApp.csproj -c Release -o publish
+    
+    - name: 📁 Prepare deployment folder
+      run: |
+        mkdir -p deploy
+        cp -r WasmApp/bin/Release/net8.0/browser-wasm/wwwroot/* deploy/
+        cp -r WasmApp/bin/Release/net8.0/browser-wasm/AppBundle/_framework deploy/
     
     - name: 📄 Setup Pages
       uses: actions/configure-pages@v4
@@ -41,7 +47,7 @@ jobs:
     - name: 📦 Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: './publish'
+        path: 'deploy'
     
     - name: 🚀 Deploy to GitHub Pages
       id: deployment
