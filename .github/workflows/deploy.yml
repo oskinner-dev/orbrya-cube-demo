@@ -1,0 +1,44 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: 📦 Restore dependencies
+      run: dotnet restore WasmApp/WasmApp.csproj
+    
+    - name: 🏗️ Build
+      run: dotnet build WasmApp/WasmApp.csproj -c Release --no-restore    
+    - name: 📤 Publish
+      run: dotnet publish WasmApp/WasmApp.csproj -c Release -o publish
+    
+    - name: 📄 Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: 📦 Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: 'publish/wwwroot'
+    
+    - name: 🚀 Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
