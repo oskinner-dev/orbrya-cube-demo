@@ -25,7 +25,8 @@
         .overlay {
             position: absolute;
             top: 20px;
-            left: 20px;            background: rgba(0, 0, 0, 0.85);
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
             color: white;
             padding: 20px;
             border-radius: 12px;
@@ -53,7 +54,8 @@
         }
         
         .control-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
             padding: 12px;
             border-radius: 8px;
@@ -81,7 +83,8 @@
             padding: 10px;
             background: rgba(0, 255, 136, 0.1);
             border-left: 3px solid #00ff88;
-            border-radius: 4px;            font-size: 12px;
+            border-radius: 4px;
+            font-size: 12px;
         }
         
         .tech-stack {
@@ -110,7 +113,8 @@
         <div class="controls">
             <button class="control-btn" onclick="CSharpController.increaseSpeed()" disabled>
                 ⚡ Faster
-            </button>            <button class="control-btn" onclick="CSharpController.decreaseSpeed()" disabled>
+            </button>
+            <button class="control-btn" onclick="CSharpController.decreaseSpeed()" disabled>
                 🐌 Slower
             </button>
             <button class="control-btn" onclick="CSharpController.stopRotation()" disabled>
@@ -139,9 +143,10 @@
     
     <script>
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0e27);        
+        scene.background = new THREE.Color(0x0a0e27);
+        
         const camera = new THREE.PerspectiveCamera(
-            75, 
+            75,
             window.innerWidth / window.innerHeight, 
             0.1, 
             1000
@@ -168,7 +173,8 @@
         const edges = new THREE.EdgesGeometry(geometry);
         const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
         const wireframe = new THREE.LineSegments(edges, lineMaterial);
-        cube.add(wireframe);        
+        cube.add(wireframe);
+        
         const light1 = new THREE.DirectionalLight(0xffffff, 1);
         light1.position.set(5, 5, 5);
         scene.add(light1);
@@ -197,7 +203,8 @@
         
         let rotationSpeed = { x: 0.01, y: 0.01 };
         
-        window.setRotationSpeed = function(x, y) {            rotationSpeed.x = x;
+        window.setRotationSpeed = function(x, y) {
+            rotationSpeed.x = x;
             rotationSpeed.y = y;
             document.getElementById('status').textContent = 
                 `Rotating at X:${x.toFixed(3)}, Y:${y.toFixed(3)}`;

@@ -28,7 +28,8 @@ public partial class CubeController
     {
         SetRotationSpeed(0.005, 0.005);
         Console.WriteLine("Speed decreased to 0.5x");
-    }    
+    }
+    
     [JSExport]
     public static void StopRotation()
     {

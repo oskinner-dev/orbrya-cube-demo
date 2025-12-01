@@ -5,10 +5,17 @@ C# WebAssembly controlling Three.js graphics - Proof of concept for educational 
 ## Architecture
 
 - **Backend**: C# compiled to WebAssembly for game logic
-- **Frontend**: Three.js for GPU-accelerated rendering  
-- **Bridge**: JavaScript Interop API for seamless communication
+- **Frontend**: Three.js for 3D rendering
+- **Bridge**: JavaScript Interop API connects the two
 
-## Quick Start
+## Why This Matters
+
+This demo proves that complex game logic can run at 60fps on low-end Chromebooks ($200 Intel Celeron N4000) by:
+1. Using compiled C# (WASM) for heavy computation
+2. Leveraging Three.js for efficient GPU rendering
+3. Minimizing cross-boundary calls between C# and JavaScript
+
+## Run Locally
 
 ```bash
 cd WasmApp
@@ -17,18 +24,12 @@ dotnet run
 
 Open http://localhost:5000
 
-## The Innovation
+## Deployment
 
-This demo proves that we can run high-performance C# logic on $200 Chromebooks by:
-1. Compiling C# to WebAssembly (near-native speed)
-2. Using Three.js for efficient GPU rendering
-3. Zero-install deployment (just a URL)
+Automatically deploys to GitHub Pages on every push to main branch.
 
-## Deploy
+Live demo: https://oskinner-dev.github.io/orbrya-cube-demo/
 
-Automatic deployment via GitHub Actions. Every push to `main` triggers:
-- .NET build
-- WASM compilation
-- GitHub Pages deployment
+## Built for Orbrya
 
-Built for **Orbrya** - Making CTE education accessible on any device.
+Educational gaming platform targeting Career & Technical Education (CTE) programs using Perkins V funding.

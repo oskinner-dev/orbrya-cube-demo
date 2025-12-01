@@ -27,7 +27,8 @@ async function initDotNet() {
 
     window.CSharpController = {
         setSpeed: exports.OrbryaCubeDemo.CubeController.SetSpeed,
-        increaseSpeed: exports.OrbryaCubeDemo.CubeController.IncreaseSpeed,        decreaseSpeed: exports.OrbryaCubeDemo.CubeController.DecreaseSpeed,
+        increaseSpeed: exports.OrbryaCubeDemo.CubeController.IncreaseSpeed,
+        decreaseSpeed: exports.OrbryaCubeDemo.CubeController.DecreaseSpeed,
         stopRotation: exports.OrbryaCubeDemo.CubeController.StopRotation,
         setCustomSpeed: exports.OrbryaCubeDemo.CubeController.SetCustomSpeed
     };

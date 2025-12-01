@@ -27,7 +27,8 @@ jobs:
       run: dotnet restore WasmApp/WasmApp.csproj
     
     - name: 🏗️ Build
-      run: dotnet build WasmApp/WasmApp.csproj -c Release --no-restore    
+      run: dotnet build WasmApp/WasmApp.csproj -c Release --no-restore
+    
     - name: 📤 Publish
       run: dotnet publish WasmApp/WasmApp.csproj -c Release -o publish
     
